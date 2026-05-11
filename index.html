@@ -1,0 +1,1574 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="美区助手">
+  <meta name="description" content="美国留学生活必备工具 - 汇率换算、天气预报、记账本、英语词典">
+  <meta name="theme-color" content="#4A90D9">
+  <title>美区助手 - 美国留学生活</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icon-1024.png">
+  <style>
+    :root {
+      --primary: #4A90D9;
+      --primary-light: #E8F4FC;
+      --primary-dark: #3A7BC8;
+      --white: #FFFFFF;
+      --bg: #F5F7FA;
+      --text-primary: #333333;
+      --text-secondary: #666666;
+      --text-light: #999999;
+      --border: #E5E7EB;
+      --success: #52C41A;
+      --warning: #FA8C16;
+      --danger: #F5222D;
+      --shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      --radius: 12px;
+      --radius-lg: 16px;
+      --safe-top: env(safe-area-inset-top, 0px);
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      height: 100%;
+      overflow: hidden;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', sans-serif;
+      background: var(--bg);
+      color: var(--text-primary);
+      line-height: 1.5;
+      padding-top: var(--safe-top);
+      padding-bottom: calc(60px + var(--safe-bottom));
+    }
+
+    .app {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .header {
+      background: var(--white);
+      padding: 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--primary);
+    }
+
+    .header-back {
+      width: 44px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--primary);
+      font-size: 24px;
+      display: none;
+    }
+
+    .header-back.visible {
+      display: flex;
+    }
+
+    .main {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      -webkit-overflow-scrolling: touch;
+      padding: 16px;
+      padding-bottom: 80px;
+    }
+
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--white);
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-around;
+      padding: 8px 0;
+      padding-bottom: calc(8px + var(--safe-bottom));
+      z-index: 100;
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      padding: 8px 12px;
+      color: var(--text-light);
+      text-decoration: none;
+      font-size: 11px;
+      cursor: pointer;
+      border: none;
+      background: none;
+      transition: color 0.2s;
+    }
+
+    .nav-item.active {
+      color: var(--primary);
+    }
+
+    .nav-icon {
+      font-size: 22px;
+      line-height: 1;
+    }
+
+    .page {
+      display: none;
+    }
+
+    .page.active {
+      display: block;
+    }
+
+    .hero {
+      text-align: center;
+      padding: 32px 16px;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      border-radius: var(--radius-lg);
+      color: var(--white);
+      margin-bottom: 24px;
+    }
+
+    .hero-title {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .hero-subtitle {
+      font-size: 14px;
+      opacity: 0.9;
+    }
+
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+
+    .feature-card {
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      padding: 24px 16px;
+      text-align: center;
+      box-shadow: var(--shadow);
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      border: none;
+    }
+
+    .feature-card:active {
+      transform: scale(0.98);
+    }
+
+    .feature-icon {
+      font-size: 40px;
+      margin-bottom: 12px;
+    }
+
+    .feature-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+
+    .feature-desc {
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    .card {
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      box-shadow: var(--shadow);
+      margin-bottom: 16px;
+    }
+
+    .card-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .section-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 16px;
+    }
+
+    .exchange-rate {
+      text-align: center;
+      padding: 24px;
+      background: linear-gradient(135deg, var(--primary-light) 0%, var(--white) 100%);
+      border-radius: var(--radius-lg);
+      margin-bottom: 16px;
+    }
+
+    .rate-label {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+    }
+
+    .rate-value {
+      font-size: 36px;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .rate-time {
+      font-size: 12px;
+      color: var(--text-light);
+      margin-top: 8px;
+    }
+
+    .converter {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .input-group {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .input-field {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      background: var(--bg);
+      border-radius: var(--radius);
+      padding: 0 16px;
+      border: 2px solid transparent;
+      transition: border-color 0.2s;
+    }
+
+    .input-field:focus-within {
+      border-color: var(--primary);
+    }
+
+    .input-field input {
+      flex: 1;
+      border: none;
+      background: none;
+      padding: 14px 0;
+      font-size: 18px;
+      outline: none;
+      width: 100%;
+    }
+
+    .input-field .currency {
+      font-size: 16px;
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
+    .swap-btn {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: var(--primary);
+      color: var(--white);
+      border: none;
+      font-size: 18px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.2s;
+    }
+
+    .swap-btn:active {
+      transform: scale(0.95);
+    }
+
+    .result {
+      text-align: center;
+      padding: 16px;
+      background: var(--primary-light);
+      border-radius: var(--radius);
+      margin-top: 8px;
+    }
+
+    .result-value {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .result-label {
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    .city-selector {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding: 4px 0;
+      margin-bottom: 16px;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .city-selector::-webkit-scrollbar {
+      display: none;
+    }
+
+    .city-chip {
+      padding: 8px 16px;
+      background: var(--bg);
+      border: 2px solid transparent;
+      border-radius: 20px;
+      font-size: 14px;
+      white-space: nowrap;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .city-chip.active {
+      background: var(--primary-light);
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
+    .weather-card {
+      text-align: center;
+      padding: 32px;
+      background: linear-gradient(135deg, var(--primary) 0%, #6BA3E0 100%);
+      border-radius: var(--radius-lg);
+      color: var(--white);
+    }
+
+    .weather-icon {
+      font-size: 64px;
+      margin-bottom: 16px;
+    }
+
+    .weather-temp {
+      font-size: 48px;
+      font-weight: 700;
+    }
+
+    .weather-desc {
+      font-size: 16px;
+      opacity: 0.9;
+      margin-bottom: 24px;
+    }
+
+    .weather-details {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      text-align: center;
+    }
+
+    .weather-detail-item {
+      background: rgba(255,255,255,0.2);
+      border-radius: var(--radius);
+      padding: 12px;
+    }
+
+    .weather-detail-label {
+      font-size: 12px;
+      opacity: 0.8;
+    }
+
+    .weather-detail-value {
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .weather-tip {
+      background: var(--white);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-top: 16px;
+      text-align: center;
+    }
+
+    .weather-tip-label {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-bottom: 4px;
+    }
+
+    .weather-tip-value {
+      font-size: 14px;
+      color: var(--text-primary);
+    }
+
+    .ledger-summary {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .summary-item {
+      background: var(--bg);
+      border-radius: var(--radius);
+      padding: 16px;
+      text-align: center;
+    }
+
+    .summary-label {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-bottom: 4px;
+    }
+
+    .summary-value {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .add-btn {
+      width: 100%;
+      padding: 14px;
+      background: var(--primary);
+      color: var(--white);
+      border: none;
+      border-radius: var(--radius);
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .add-btn:active {
+      background: var(--primary-dark);
+    }
+
+    .category-tabs {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding: 4px 0;
+      margin-bottom: 16px;
+    }
+
+    .category-tabs::-webkit-scrollbar {
+      display: none;
+    }
+
+    .category-tab {
+      padding: 8px 16px;
+      background: var(--bg);
+      border-radius: 20px;
+      font-size: 13px;
+      white-space: nowrap;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s;
+    }
+
+    .category-tab.active {
+      background: var(--primary);
+      color: var(--white);
+    }
+
+    .ledger-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .ledger-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px;
+      background: var(--white);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .ledger-icon {
+      width: 44px;
+      height: 44px;
+      background: var(--primary-light);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+    }
+
+    .ledger-info {
+      flex: 1;
+    }
+
+    .ledger-category {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+
+    .ledger-note {
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    .ledger-amount {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--danger);
+    }
+
+    .ledger-date {
+      font-size: 11px;
+      color: var(--text-light);
+    }
+
+    .ledger-delete {
+      width: 32px;
+      height: 32px;
+      border: none;
+      background: none;
+      color: var(--text-light);
+      cursor: pointer;
+      font-size: 18px;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 48px 24px;
+      color: var(--text-secondary);
+    }
+
+    .empty-icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+    }
+
+    .empty-text {
+      font-size: 14px;
+    }
+
+    .search-box {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .search-input {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 0 16px;
+    }
+
+    .search-input input {
+      flex: 1;
+      border: none;
+      background: none;
+      padding: 12px 0;
+      font-size: 14px;
+      outline: none;
+    }
+
+    .search-input .icon {
+      color: var(--text-light);
+    }
+
+    .word-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .word-item {
+      background: var(--white);
+      border-radius: var(--radius);
+      padding: 16px;
+      box-shadow: var(--shadow);
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    .word-item:active {
+      transform: scale(0.98);
+    }
+
+    .word-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+
+    .word-text {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .word-phonetic {
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    .word-translation {
+      font-size: 14px;
+      color: var(--primary);
+      margin-bottom: 8px;
+    }
+
+    .word-example {
+      font-size: 13px;
+      color: var(--text-secondary);
+      font-style: italic;
+      padding-left: 12px;
+      border-left: 3px solid var(--primary-light);
+    }
+
+    .word-example-trans {
+      font-size: 12px;
+      color: var(--text-light);
+      margin-top: 4px;
+    }
+
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.5);
+      display: none;
+      align-items: flex-end;
+      justify-content: center;
+      z-index: 200;
+    }
+
+    .modal-overlay.visible {
+      display: flex;
+    }
+
+    .modal {
+      background: var(--white);
+      border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+      width: 100%;
+      max-height: 80vh;
+      overflow-y: auto;
+      animation: slideUp 0.3s ease;
+    }
+
+    @keyframes slideUp {
+      from {
+        transform: translateY(100%);
+      }
+      to {
+        transform: translateY(0);
+      }
+    }
+
+    .modal-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .modal-title {
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .modal-close {
+      width: 32px;
+      height: 32px;
+      border: none;
+      background: none;
+      font-size: 20px;
+      cursor: pointer;
+      color: var(--text-secondary);
+    }
+
+    .modal-body {
+      padding: 20px;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-label {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-size: 16px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .form-input:focus {
+      border-color: var(--primary);
+    }
+
+    .category-select {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    .category-option {
+      padding: 12px;
+      background: var(--bg);
+      border: 2px solid transparent;
+      border-radius: var(--radius);
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .category-option.selected {
+      background: var(--primary-light);
+      border-color: var(--primary);
+    }
+
+    .category-option .icon {
+      font-size: 24px;
+      margin-bottom: 4px;
+    }
+
+    .category-option .name {
+      font-size: 13px;
+    }
+
+    .submit-btn {
+      width: 100%;
+      padding: 14px;
+      background: var(--primary);
+      color: var(--white);
+      border: none;
+      border-radius: var(--radius);
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      margin-top: 8px;
+    }
+
+    .submit-btn:active {
+      background: var(--primary-dark);
+    }
+
+    .loading {
+      text-align: center;
+      padding: 32px;
+      color: var(--text-secondary);
+    }
+
+    .loading-spinner {
+      width: 32px;
+      height: 32px;
+      border: 3px solid var(--border);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 12px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .error {
+      text-align: center;
+      padding: 32px;
+      color: var(--danger);
+    }
+
+    .retry-btn {
+      margin-top: 12px;
+      padding: 10px 20px;
+      background: var(--primary);
+      color: var(--white);
+      border: none;
+      border-radius: var(--radius);
+      cursor: pointer;
+    }
+
+    .api-key-notice {
+      background: #FFF7E6;
+      border: 1px solid #FFD591;
+      border-radius: var(--radius);
+      padding: 12px;
+      margin-bottom: 16px;
+      font-size: 13px;
+      color: var(--warning);
+    }
+
+    .api-key-notice strong {
+      display: block;
+      margin-bottom: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="header">
+      <button class="header-back" id="backBtn" onclick="navigateTo('home')">←</button>
+      <h1 class="header-title" id="pageTitle">美区助手</h1>
+    </header>
+
+    <main class="main">
+      <div id="page-home" class="page active">
+        <div class="hero">
+          <h2 class="hero-title">美区助手</h2>
+          <p class="hero-subtitle">留美生活，一站式工具</p>
+        </div>
+        <div class="feature-grid">
+          <button class="feature-card" onclick="navigateTo('exchange')">
+            <div class="feature-icon">💱</div>
+            <div class="feature-title">汇率换算</div>
+            <div class="feature-desc">美元/人民币实时汇率</div>
+          </button>
+          <button class="feature-card" onclick="navigateTo('weather')">
+            <div class="feature-icon">🌤️</div>
+            <div class="feature-title">天气预报</div>
+            <div class="feature-desc">阿拉巴马州天气</div>
+          </button>
+          <button class="feature-card" onclick="navigateTo('ledger')">
+            <div class="feature-icon">📒</div>
+            <div class="feature-title">记账本</div>
+            <div class="feature-desc">本地生活支出记录</div>
+          </button>
+          <button class="feature-card" onclick="navigateTo('dictionary')">
+            <div class="feature-icon">📖</div>
+            <div class="feature-title">英语词典</div>
+            <div class="feature-desc">美国生活常用英文</div>
+          </button>
+        </div>
+      </div>
+
+      <div id="page-exchange" class="page">
+        <div class="exchange-rate">
+          <div class="rate-label">当前汇率</div>
+          <div class="rate-value" id="rateDisplay">加载中...</div>
+          <div class="rate-time" id="rateTime"></div>
+        </div>
+        <div class="card">
+          <div class="card-title">💱 货币换算</div>
+          <div class="converter">
+            <div class="input-group">
+              <div class="input-field">
+                <input type="number" id="usdInput" placeholder="0" oninput="convertCurrency('usd')">
+                <span class="currency">USD</span>
+              </div>
+            </div>
+            <button class="swap-btn" onclick="swapCurrency()">⇅</button>
+            <div class="input-group">
+              <div class="input-field">
+                <input type="number" id="cnyInput" placeholder="0" oninput="convertCurrency('cny')">
+                <span class="currency">CNY</span>
+              </div>
+            </div>
+            <div class="result">
+              <div class="result-value" id="resultDisplay">¥0.00</div>
+              <div class="result-label" id="resultLabel">1 USD = ¥7.24 CNY</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="page-weather" class="page">
+        <div class="api-key-notice">
+          <strong>⚠️ API Key 说明</strong>
+          天气功能需要 OpenWeatherMap API Key。<br>
+          请前往 <a href="https://openweathermap.org/api" target="_blank">openweathermap.org</a> 免费申请，<br>
+          然后联系开发者配置。
+        </div>
+        <div class="city-selector" id="citySelector"></div>
+        <div class="weather-card" id="weatherCard">
+          <div class="loading">
+            <div class="loading-spinner"></div>
+            <div>加载天气中...</div>
+          </div>
+        </div>
+      </div>
+
+      <div id="page-ledger" class="page">
+        <div class="card">
+          <div class="ledger-summary">
+            <div class="summary-item">
+              <div class="summary-label">本月支出</div>
+              <div class="summary-value">$<span id="monthTotal">0.00</span></div>
+            </div>
+            <div class="summary-item">
+              <div class="summary-label">记录数</div>
+              <div class="summary-value" id="recordCount">0</div>
+            </div>
+          </div>
+          <button class="add-btn" onclick="openAddModal()">+ 添加记录</button>
+          <div class="category-tabs" id="ledgerCategories"></div>
+          <div class="ledger-list" id="ledgerList"></div>
+        </div>
+      </div>
+
+      <div id="page-dictionary" class="page">
+        <div class="search-box">
+          <div class="search-input">
+            <span class="icon">🔍</span>
+            <input type="text" id="dictSearch" placeholder="搜索单词或中文..." oninput="searchDictionary()">
+          </div>
+        </div>
+        <div class="category-tabs" id="dictCategories"></div>
+        <div class="word-list" id="wordList"></div>
+      </div>
+    </main>
+
+    <nav class="bottom-nav" id="bottomNav">
+      <button class="nav-item active" data-page="home" onclick="navigateTo('home')">
+        <span class="nav-icon">🏠</span>
+        <span>首页</span>
+      </button>
+      <button class="nav-item" data-page="exchange" onclick="navigateTo('exchange')">
+        <span class="nav-icon">💱</span>
+        <span>汇率</span>
+      </button>
+      <button class="nav-item" data-page="weather" onclick="navigateTo('weather')">
+        <span class="nav-icon">🌤️</span>
+        <span>天气</span>
+      </button>
+      <button class="nav-item" data-page="ledger" onclick="navigateTo('ledger')">
+        <span class="nav-icon">📒</span>
+        <span>记账</span>
+      </button>
+      <button class="nav-item" data-page="dictionary" onclick="navigateTo('dictionary')">
+        <span class="nav-icon">📖</span>
+        <span>词典</span>
+      </button>
+    </nav>
+  </div>
+
+  <div class="modal-overlay" id="addModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title">添加记账记录</h3>
+        <button class="modal-close" onclick="closeAddModal()">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">金额 (USD)</label>
+          <input type="number" class="form-input" id="amountInput" placeholder="0.00" step="0.01" min="0">
+        </div>
+        <div class="form-group">
+          <label class="form-label">类别</label>
+          <div class="category-select" id="categorySelect"></div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">备注 (可选)</label>
+          <input type="text" class="form-input" id="noteInput" placeholder="简要描述...">
+        </div>
+        <button class="submit-btn" onclick="submitLedger()">保存记录</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const CATEGORIES = [
+      { id: 'food', name: '餐饮', icon: '🍔' },
+      { id: 'shopping', name: '购物', icon: '🛒' },
+      { id: 'transport', name: '交通', icon: '🚗' },
+      { id: 'housing', name: '住宿', icon: '🏠' },
+      { id: 'entertainment', name: '娱乐', icon: '🎮' },
+      { id: 'other', name: '其他', icon: '📦' }
+    ];
+
+    const CITIES = [
+      { id: 'birmingham', name: 'Birmingham', nameCn: '伯明翰' },
+      { id: 'mobile', name: 'Mobile', nameCn: '莫比尔' },
+      { id: 'huntsville', name: 'Huntsville', nameCn: '亨茨维尔' },
+      { id: 'montgomery', name: 'Montgomery', nameCn: '蒙哥马利' },
+      { id: 'tuscaloosa', name: 'Tuscaloosa', nameCn: '图斯卡卢萨' }
+    ];
+
+    const DICTIONARY = [
+      { word: 'Receipt', phonetic: '/rɪˈsiːt/', translation: '收据', category: 'shopping', example: 'Can I have the receipt please?', exampleTranslation: '请给我收据好吗？' },
+      { word: 'Return', phonetic: '/rɪˈtɜːrn/', translation: '退货', category: 'shopping', example: 'I would like to return this item.', exampleTranslation: '我想退这件商品。' },
+      { word: 'On Sale', phonetic: '/ɒn seɪl/', translation: '打折/特价', category: 'shopping', example: 'This shirt is on sale today.', exampleTranslation: '这件衬衫今天打折。' },
+      { word: 'Out of Stock', phonetic: '/aʊt əv stɒk/', translation: '缺货', category: 'shopping', example: 'Sorry, this item is out of stock.', exampleTranslation: '抱歉，这个商品缺货。' },
+      { word: 'Receipt', phonetic: '/rɪˈsiːt/', translation: '收据/小票', category: 'shopping', example: 'Keep the receipt for returns.', exampleTranslation: '保留小票以便退货。' },
+      { word: 'Menu', phonetic: '/ˈmenjuː/', translation: '菜单', category: 'food', example: 'May I see the menu?', exampleTranslation: '我可以看看菜单吗？' },
+      { word: 'To-Go', phonetic: '/tə ɡoʊ/', translation: '外带/打包', category: 'food', example: 'I would like this order to-go.', exampleTranslation: '我想要外带这份订单。' },
+      { word: 'Tip', phonetic: '/tɪp/', translation: '小费', category: 'food', example: 'The tip is not included.', exampleTranslation: '小费不包含在内。' },
+      { word: 'Refill', phonetic: '/ˈriːfɪl/', translation: '续杯', category: 'food', example: 'Can I get a refill?', exampleTranslation: '我可以续杯吗？' },
+      { word: 'Waitlist', phonetic: '/ˈweɪtlɪst/', translation: '等位名单', category: 'food', example: 'Your name is on the waitlist.', exampleTranslation: '您的名字在等位名单上。' },
+      { word: 'One-Way', phonetic: '/wʌn weɪ/', translation: '单程', category: 'transport', example: 'I need a one-way ticket.', exampleTranslation: '我需要一张单程票。' },
+      { word: 'Transfer', phonetic: '/ˈtrænsfɜːr/', translation: '换乘/转车', category: 'transport', example: 'You need to transfer at the next station.', exampleTranslation: '您需要在下一站换乘。' },
+      { word: 'Platform', phonetic: '/ˈplætfɔːrm/', translation: '站台', category: 'transport', example: 'The train is at platform 3.', exampleTranslation: '火车在3号站台。' },
+      { word: 'Departure', phonetic: '/dɪˈpɑːrtʃər/', translation: '出发', category: 'transport', example: 'What is the departure time?', exampleTranslation: '出发时间是什么时候？' },
+      { word: 'Arrival', phonetic: '/əˈraɪvl/', translation: '到达', category: 'transport', example: 'Your arrival time is 5 PM.', exampleTranslation: '您到达时间是下午5点。' },
+      { word: 'Pharmacy', phonetic: '/ˈfɑːrməsi/', translation: '药房', category: 'medical', example: 'Where is the nearest pharmacy?', exampleTranslation: '最近的药房在哪里？' },
+      { word: 'Prescription', phonetic: '/prɪˈskrɪpʃn/', translation: '处方', category: 'medical', example: 'I need to fill this prescription.', exampleTranslation: '我需要配这个处方。' },
+      { word: 'Appointment', phonetic: '/əˈpɔɪntmənt/', translation: '预约', category: 'medical', example: 'I have an appointment at 2 PM.', exampleTranslation: '我下午2点有预约。' },
+      { word: 'Allergy', phonetic: '/ˈælərdʒi/', translation: '过敏', category: 'medical', example: 'Do you have any allergies?', exampleTranslation: '您有什么过敏吗？' },
+      { word: 'Insurance', phonetic: '/ɪnˈʃʊərəns/', translation: '保险', category: 'medical', example: 'Do you accept my insurance?', exampleTranslation: '你们接受我的保险吗？' },
+      { word: 'Deposit', phonetic: '/dɪˈpɑːzɪt/', translation: '存款', category: 'bank', example: 'I want to make a deposit.', exampleTranslation: '我想存款。' },
+      { word: 'Withdraw', phonetic: '/wɪðˈdrɔː/', translation: '取款', category: 'bank', example: 'I would like to withdraw money.', exampleTranslation: '我想取款。' },
+      { word: 'Balance', phonetic: '/ˈbæləns/', translation: '余额', category: 'bank', example: 'What is my account balance?', exampleTranslation: '我的账户余额是多少？' },
+      { word: 'ATM', phonetic: '/ˌeɪ tiː ˈem/', translation: '自动取款机', category: 'bank', example: 'Where is the nearest ATM?', exampleTranslation: '最近的ATM在哪里？' },
+      { word: 'Transfer', phonetic: '/trænsˈfɜːr/', translation: '转账', category: 'bank', example: 'I want to transfer money.', exampleTranslation: '我想转账。' },
+      { word: 'Syllabus', phonetic: '/ˈsɪləbəs/', translation: '教学大纲', category: 'school', example: 'Where can I find the syllabus?', exampleTranslation: '我在哪里可以找到教学大纲？' },
+      { word: 'Credits', phonetic: '/ˈkredɪts/', translation: '学分', category: 'school', example: 'How many credits do I need?', exampleTranslation: '我需要多少学分？' },
+      { word: 'Semester', phonetic: '/sɪˈmestər/', translation: '学期', category: 'school', example: 'When does the semester start?', exampleTranslation: '学期什么时候开始？' },
+      { word: 'Enrollment', phonetic: '/ɪnˈroʊlmənt/', translation: '注册/选课', category: 'school', example: 'The enrollment deadline is next week.', exampleTranslation: '选课截止日期是下周。' },
+      { word: 'Tuition', phonetic: '/tuːˈɪʃn/', translation: '学费', category: 'school', example: 'When is the tuition due?', exampleTranslation: '学费什么时候交？' }
+    ];
+
+    const WEATHER_ICONS = {
+      'Clear': '☀️', 'Clouds': '☁️', 'Rain': '🌧️', 'Drizzle': '🌦️',
+      'Thunderstorm': '⛈️', 'Snow': '❄️', 'Mist': '🌫️', 'Fog': '🌫️',
+      'Haze': '🌫️', 'Dust': '💨', 'Smoke': '💨', 'default': '🌤️'
+    };
+
+    const WEATHER_API_KEY = 'aa4c7d2c7c1eeae6cb40e2f4c3a95049';
+    const EXCHANGE_API = 'https://api.exchangerate-api.com/v4/latest/USD';
+
+    let currentPage = 'home';
+    let exchangeRate = 7.24;
+    let selectedCategory = 'all';
+    let selectedCity = 'birmingham';
+    let selectedLedgerCategory = 'all';
+    let currentExchangeRate = null;
+
+    function init() {
+      renderCitySelector();
+      renderLedgerCategories();
+      renderDictCategories();
+      renderLedgerList();
+      updateLedgerStats();
+      loadExchangeRate();
+      loadWeather();
+      handleRoute();
+      window.addEventListener('hashchange', handleRoute);
+    }
+
+    function handleRoute() {
+      const hash = window.location.hash.slice(2) || 'home';
+      navigateTo(hash);
+    }
+
+    function navigateTo(page) {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+
+      const pageEl = document.getElementById(`page-${page}`);
+      const navItem = document.querySelector(`.nav-item[data-page="${page}"]`);
+
+      if (pageEl) pageEl.classList.add('active');
+      if (navItem) navItem.classList.add('active');
+
+      const backBtn = document.getElementById('backBtn');
+      const pageTitle = document.getElementById('pageTitle');
+
+      if (page === 'home') {
+        backBtn.classList.remove('visible');
+        pageTitle.textContent = '美区助手';
+      } else {
+        backBtn.classList.add('visible');
+        const titles = {
+          exchange: '汇率换算',
+          weather: '天气预报',
+          ledger: '记账本',
+          dictionary: '英语词典'
+        };
+        pageTitle.textContent = titles[page] || '美区助手';
+      }
+
+      if (page === 'exchange' && !currentExchangeRate) {
+        loadExchangeRate();
+      }
+      if (page === 'weather' && !currentExchangeRate) {
+        loadWeather();
+      }
+
+      currentPage = page;
+      window.location.hash = page;
+    }
+
+    async function loadExchangeRate() {
+      const rateDisplay = document.getElementById('rateDisplay');
+      const rateTime = document.getElementById('rateTime');
+      const resultLabel = document.getElementById('resultLabel');
+
+      rateDisplay.textContent = '加载中...';
+
+      try {
+        const cached = localStorage.getItem('exchange_cache');
+        const cacheTime = localStorage.getItem('exchange_cache_time');
+        const now = Date.now();
+
+        if (cached && cacheTime && (now - parseInt(cacheTime)) < 3600000) {
+          const data = JSON.parse(cached);
+          exchangeRate = data.rates.CNY;
+          currentExchangeRate = data;
+          displayRate(data);
+          return;
+        }
+
+        const response = await fetch(EXCHANGE_API);
+        if (!response.ok) throw new Error('API Error');
+
+        const data = await response.json();
+        exchangeRate = data.rates.CNY;
+        currentExchangeRate = data;
+
+        localStorage.setItem('exchange_cache', JSON.stringify(data));
+        localStorage.setItem('exchange_cache_time', now.toString());
+
+        displayRate(data);
+      } catch (error) {
+        console.error('汇率加载失败:', error);
+        const cached = localStorage.getItem('exchange_cache');
+        if (cached) {
+          const data = JSON.parse(cached);
+          exchangeRate = data.rates.CNY;
+          currentExchangeRate = data;
+          displayRate(data);
+          rateTime.textContent = '（离线数据）';
+        } else {
+          rateDisplay.textContent = '加载失败';
+          rateTime.textContent = '请检查网络连接';
+        }
+      }
+    }
+
+    function displayRate(data) {
+      const rateDisplay = document.getElementById('rateDisplay');
+      const rateTime = document.getElementById('rateTime');
+      const resultLabel = document.getElementById('resultLabel');
+
+      rateDisplay.textContent = `1 USD = ¥${data.rates.CNY.toFixed(4)} CNY`;
+      rateTime.textContent = `更新时间: ${new Date().toLocaleString('zh-CN')}`;
+      resultLabel.textContent = `1 USD = ¥${data.rates.CNY.toFixed(2)} CNY`;
+    }
+
+    function convertCurrency(source) {
+      const usdInput = document.getElementById('usdInput');
+      const cnyInput = document.getElementById('cnyInput');
+      const resultDisplay = document.getElementById('resultDisplay');
+
+      if (source === 'usd') {
+        const usd = parseFloat(usdInput.value) || 0;
+        const cny = (usd * exchangeRate).toFixed(2);
+        cnyInput.value = usd > 0 ? cny : '';
+        resultDisplay.textContent = `¥${cny}`;
+      } else {
+        const cny = parseFloat(cnyInput.value) || 0;
+        const usd = (cny / exchangeRate).toFixed(2);
+        usdInput.value = cny > 0 ? usd : '';
+        resultDisplay.textContent = `$${usd}`;
+      }
+    }
+
+    function swapCurrency() {
+      const usdInput = document.getElementById('usdInput');
+      const cnyInput = document.getElementById('cnyInput');
+      const temp = usdInput.value;
+      usdInput.value = cnyInput.value;
+      cnyInput.value = temp;
+      convertCurrency('usd');
+    }
+
+    function renderCitySelector() {
+      const container = document.getElementById('citySelector');
+      container.innerHTML = CITIES.map(city => `
+        <button class="city-chip ${city.id === selectedCity ? 'active' : ''}"
+                onclick="selectCity('${city.id}')">
+          ${city.nameCn} (${city.name})
+        </button>
+      `).join('');
+    }
+
+    function selectCity(cityId) {
+      selectedCity = cityId;
+      renderCitySelector();
+      loadWeather();
+    }
+
+    async function loadWeather() {
+      const weatherCard = document.getElementById('weatherCard');
+      weatherCard.innerHTML = `
+        <div class="loading">
+          <div class="loading-spinner"></div>
+          <div>加载天气中...</div>
+        </div>
+      `;
+
+      if (WEATHER_API_KEY === 'YOUR_API_KEY_HERE') {
+        weatherCard.innerHTML = `
+          <div class="weather-icon">🌤️</div>
+          <div class="weather-temp">--°F</div>
+          <div class="weather-desc">请配置 OpenWeatherMap API Key</div>
+          <div class="weather-details">
+            <div class="weather-detail-item">
+              <div class="weather-detail-label">湿度</div>
+              <div class="weather-detail-value">--%</div>
+            </div>
+            <div class="weather-detail-item">
+              <div class="weather-detail-label">风速</div>
+              <div class="weather-detail-value">-- mph</div>
+            </div>
+            <div class="weather-detail-item">
+              <div class="weather-detail-label">体感</div>
+              <div class="weather-detail-value">--°F</div>
+            </div>
+          </div>
+          <div class="weather-tip">
+            <div class="weather-tip-label">穿衣建议</div>
+            <div class="weather-tip-value">请先配置 API Key</div>
+          </div>
+        `;
+        return;
+      }
+
+      const city = CITIES.find(c => c.id === selectedCity);
+      const url = `https://api.openweathermap.org/data/2.5/weather?q=${city.name},AL,US&appid=${WEATHER_API_KEY}&units=imperial`;
+
+      try {
+        const cached = localStorage.getItem(`weather_cache_${selectedCity}`);
+        const cacheTime = localStorage.getItem(`weather_cache_time_${selectedCity}`);
+        const now = Date.now();
+
+        if (cached && cacheTime && (now - parseInt(cacheTime)) < 1800000) {
+          displayWeather(JSON.parse(cached));
+          return;
+        }
+
+        const response = await fetch(url);
+        if (!response.ok) throw new Error('API Error');
+        const data = await response.json();
+
+        localStorage.setItem(`weather_cache_${selectedCity}`, JSON.stringify(data));
+        localStorage.setItem(`weather_cache_time_${selectedCity}`, now.toString());
+
+        displayWeather(data);
+      } catch (error) {
+        console.error('天气加载失败:', error);
+        const cached = localStorage.getItem(`weather_cache_${selectedCity}`);
+        if (cached) {
+          displayWeather(JSON.parse(cached));
+        } else {
+          weatherCard.innerHTML = `
+            <div class="error">
+              <div>天气加载失败</div>
+              <button class="retry-btn" onclick="loadWeather()">重试</button>
+            </div>
+          `;
+        }
+      }
+    }
+
+    function displayWeather(data) {
+      const weatherCard = document.getElementById('weatherCard');
+      const icon = WEATHER_ICONS[data.weather[0].main] || WEATHER_ICONS.default;
+      const temp = Math.round(data.main.temp);
+      const advice = getClothingAdvice(data.main.temp);
+
+      weatherCard.innerHTML = `
+        <div class="weather-icon">${icon}</div>
+        <div class="weather-temp">${temp}°F</div>
+        <div class="weather-desc">${data.weather[0].description}</div>
+        <div class="weather-details">
+          <div class="weather-detail-item">
+            <div class="weather-detail-label">湿度</div>
+            <div class="weather-detail-value">${data.main.humidity}%</div>
+          </div>
+          <div class="weather-detail-item">
+            <div class="weather-detail-label">风速</div>
+            <div class="weather-detail-value">${Math.round(data.wind.speed)} mph</div>
+          </div>
+          <div class="weather-detail-item">
+            <div class="weather-detail-label">体感</div>
+            <div class="weather-detail-value">${Math.round(data.main.feels_like)}°F</div>
+          </div>
+        </div>
+        <div class="weather-tip">
+          <div class="weather-tip-label">👔 穿衣建议</div>
+          <div class="weather-tip-value">${advice}</div>
+        </div>
+      `;
+    }
+
+    function getClothingAdvice(tempF) {
+      if (tempF < 32) return '羽绒服、大衣、保暖内衣、围巾、手套';
+      if (tempF < 50) return '厚外套、毛衣、长裤、帽子';
+      if (tempF < 68) return '外套、长袖衬衫、长裤';
+      if (tempF < 77) return '薄外套、长袖、短裤或长裤';
+      if (tempF < 86) return '短袖、短裤，注意防晒';
+      return '轻薄短袖短裤，注意防晒和补水';
+    }
+
+    function renderLedgerCategories() {
+      const container = document.getElementById('ledgerCategories');
+      container.innerHTML = `
+        <button class="category-tab ${selectedLedgerCategory === 'all' ? 'active' : ''}"
+                onclick="filterLedger('all')">全部</button>
+        ${CATEGORIES.map(cat => `
+          <button class="category-tab ${selectedLedgerCategory === cat.id ? 'active' : ''}"
+                  onclick="filterLedger('${cat.id}')">${cat.icon} ${cat.name}</button>
+        `).join('')}
+      `;
+    }
+
+    function filterLedger(category) {
+      selectedLedgerCategory = category;
+      renderLedgerCategories();
+      renderLedgerList();
+    }
+
+    function renderLedgerList() {
+      const container = document.getElementById('ledgerList');
+      let records = getRecords();
+
+      if (selectedLedgerCategory !== 'all') {
+        records = records.filter(r => r.category === selectedLedgerCategory);
+      }
+
+      if (records.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon">📝</div>
+            <div class="empty-text">暂无记录<br>点击上方按钮添加</div>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = records.map(record => {
+        const category = CATEGORIES.find(c => c.id === record.category);
+        const date = new Date(record.timestamp);
+        return `
+          <div class="ledger-item">
+            <div class="ledger-icon">${category ? category.icon : '📦'}</div>
+            <div class="ledger-info">
+              <div class="ledger-category">${category ? category.name : '其他'}</div>
+              <div class="ledger-note">${record.note || '无备注'}</div>
+              <div class="ledger-date">${date.toLocaleDateString('zh-CN')} ${date.toLocaleTimeString('zh-CN', {hour:'2-digit', minute:'2-digit'})}</div>
+            </div>
+            <div class="ledger-amount">-$${record.amount.toFixed(2)}</div>
+            <button class="ledger-delete" onclick="deleteRecord('${record.id}')">×</button>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function updateLedgerStats() {
+      const records = getRecords();
+      const now = new Date();
+      const monthRecords = records.filter(r => {
+        const d = new Date(r.timestamp);
+        return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+      });
+      const total = monthRecords.reduce((sum, r) => sum + r.amount, 0);
+
+      document.getElementById('monthTotal').textContent = total.toFixed(2);
+      document.getElementById('recordCount').textContent = records.length;
+    }
+
+    function getRecords() {
+      const data = localStorage.getItem('ledger_records');
+      return data ? JSON.parse(data) : [];
+    }
+
+    function saveRecords(records) {
+      localStorage.setItem('ledger_records', JSON.stringify(records));
+    }
+
+    function deleteRecord(id) {
+      const records = getRecords().filter(r => r.id !== id);
+      saveRecords(records);
+      renderLedgerList();
+      updateLedgerStats();
+    }
+
+    function openAddModal() {
+      document.getElementById('addModal').classList.add('visible');
+      document.getElementById('amountInput').value = '';
+      document.getElementById('noteInput').value = '';
+
+      const container = document.getElementById('categorySelect');
+      container.innerHTML = CATEGORIES.map(cat => `
+        <div class="category-option" data-category="${cat.id}" onclick="selectLedgerCategory('${cat.id}')">
+          <div class="icon">${cat.icon}</div>
+          <div class="name">${cat.name}</div>
+        </div>
+      `).join('');
+
+      selectedCategory = 'food';
+      document.querySelector('.category-option[data-category="food"]').classList.add('selected');
+    }
+
+    function closeAddModal() {
+      document.getElementById('addModal').classList.remove('visible');
+    }
+
+    function selectLedgerCategory(categoryId) {
+      selectedCategory = categoryId;
+      document.querySelectorAll('.category-option').forEach(el => {
+        el.classList.toggle('selected', el.dataset.category === categoryId);
+      });
+    }
+
+    function submitLedger() {
+      const amount = parseFloat(document.getElementById('amountInput').value);
+      const note = document.getElementById('noteInput').value.trim();
+
+      if (!amount || amount <= 0) {
+        alert('请输入有效金额');
+        return;
+      }
+
+      const records = getRecords();
+      records.unshift({
+        id: Date.now().toString(),
+        amount,
+        category: selectedCategory,
+        note,
+        timestamp: Date.now()
+      });
+
+      saveRecords(records);
+      closeAddModal();
+      renderLedgerList();
+      updateLedgerStats();
+    }
+
+    function renderDictCategories() {
+      const container = document.getElementById('dictCategories');
+      const dictCats = [
+        { id: 'all', name: '全部' },
+        { id: 'shopping', name: '🛒 购物' },
+        { id: 'food', name: '🍽️ 餐饮' },
+        { id: 'transport', name: '🚌 交通' },
+        { id: 'medical', name: '💊 医疗' },
+        { id: 'bank', name: '🏦 银行' },
+        { id: 'school', name: '📚 学校' }
+      ];
+
+      container.innerHTML = dictCats.map(cat => `
+        <button class="category-tab ${selectedCategory === cat.id ? 'active' : ''}"
+                onclick="filterDict('${cat.id}')">${cat.name}</button>
+      `).join('');
+    }
+
+    function filterDict(category) {
+      selectedCategory = category;
+      document.getElementById('dictSearch').value = '';
+      renderDictCategories();
+      renderWordList(DICTIONARY);
+    }
+
+    function searchDictionary() {
+      const query = document.getElementById('dictSearch').value.toLowerCase().trim();
+      selectedCategory = 'all';
+      renderDictCategories();
+
+      if (!query) {
+        renderWordList(DICTIONARY);
+        return;
+      }
+
+      const filtered = DICTIONARY.filter(item =>
+        item.word.toLowerCase().includes(query) ||
+        item.translation.includes(query)
+      );
+      renderWordList(filtered);
+    }
+
+    function renderWordList(words) {
+      const container = document.getElementById('wordList');
+
+      if (words.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon">🔍</div>
+            <div class="empty-text">未找到相关词汇</div>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = words.map(item => `
+        <div class="word-item">
+          <div class="word-header">
+            <span class="word-text">${item.word}</span>
+            <span class="word-phonetic">${item.phonetic}</span>
+          </div>
+          <div class="word-translation">${item.translation}</div>
+          <div class="word-example">${item.example}</div>
+          <div class="word-example-trans">${item.exampleTranslation}</div>
+        </div>
+      `).join('');
+    }
+
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./service-worker.js')
+          .then(reg => console.log('SW registered:', reg))
+          .catch(err => console.error('SW registration failed:', err));
+      });
+    }
+
+    init();
+  </script>
+</body>
+</html>
